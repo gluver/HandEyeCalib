@@ -1,0 +1,9 @@
+venv/
+result0225/
+build/
+DI/
+DI0226/
+input_data
+opencv-4.11.0/
+*.zip
+*.rar
