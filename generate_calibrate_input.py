@@ -101,6 +101,6 @@ def main():
 # Write the filtered pose data to a CSV file
 filtered_pose_data = np.array(filtered_pose_data)
 pose_output_path = os.path.join(dst_base, f'filtered_pose_data_{human_friendly_name}.csv')
-np.savetxt(pose_output_path, filtered_pose_data, delimiter=',')
+np.savetxt(pose_output_path, filtered_pose_data, delimiter=',', fmt='%.6f')
 print(f'Filtered pose data saved to {pose_output_path}')
    

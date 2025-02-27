@@ -12,3 +12,4 @@ camera_params:
   - 0.0428337  # k3
 square_size: 50  # Size of a square in the chessboard pattern
 pattern_size: [4, 3]  # Size of the chessboard pattern as columns,rows
+corner_color: 'black'  # Corner color, 'black' or 'white'

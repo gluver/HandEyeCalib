@@ -15,6 +15,7 @@ import re
 import os
 import argparse
 import yaml
+import logging
 
 def pose_vectors_to_base2end_transforms(pose_vectors):
     # 提取旋转矩阵和平移向量
@@ -79,12 +80,16 @@ def load_config(config_file):
     return config
 
 def main(config_file):
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    
     config = load_config(config_file)
 
     # 输入位姿数据
     pose_vectors = np.loadtxt(config['pose_file'], delimiter=',')
-    print("Loaded pose vectors from CSV:")
-    print(pose_vectors)
+    logger.info("Loaded pose vectors from CSV:")
+    logger.info(pose_vectors)
 
     # 导入相机内参和畸变参数
     camera_params = config['camera_params']
@@ -98,6 +103,7 @@ def main(config_file):
     # 棋盘格参数
     square_size = config['square_size']
     pattern_size = tuple(config['pattern_size'])
+    corner_color = config['corner_color']
 
     # 准备位姿数据
     obj_points = []  # 用于保存世界坐标系中的三维点
@@ -112,11 +118,12 @@ def main(config_file):
     for i in range(50):
         image = os.path.join(config['image_folder'], f'{i}.jpg')
         if i == 0:
-            print(image)
+            logger.info(os.path.basename(image))
         if not os.path.exists(image):
             continue
         img = cv2.imread(image)   # 读取图像
-        img = cv2.bitwise_not(img)   # 取反，因为棋盘格检测函数findChessboardCorners默认检测黑色角点
+        if corner_color == 'black':
+            img = cv2.bitwise_not(img)   # 取反，因为棋盘格检测函数findChessboardCorners默认检测黑色角点
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)   # RGB图像转换为灰度图像
 
         # 棋盘格检测
@@ -166,18 +173,23 @@ def main(config_file):
     T_camera2base[:3, 3] = t_camera2base.reshape(3)
 
     # 输出相机相对于机械臂基座的旋转矩阵和平移向量
-    print("Camera to base / base to camera rotation matrix:")
-    print(R_camera2base)
-    print("Camera to base translation vector:") 
-    print(t_camera2base)
+    logger.info("Camera to base / base to camera rotation matrix:")
+    logger.info(R_camera2base)
+    logger.info("Camera to base translation vector:") 
+    logger.info(t_camera2base)
 
     # 输出相机相对于机械臂基座的位姿矩阵
-    print("Camera to base pose matrix:")
+    logger.info("Camera to base pose matrix:")
     np.set_printoptions(suppress=True)  # suppress参数用于禁用科学计数法
-    print(T_camera2base)
+    logger.info(T_camera2base)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hand-eye calibration using chessboard images.')
-    parser.add_argument('config_file', type=str, help='Path to the YAML configuration file.')
+    parser.add_argument('--config_file', type=str, default='config_template.yaml', help='Path to the YAML configuration file.')
     args = parser.parse_args()
+    if args.config_file=='config_template.yaml':
+            logging.basicConfig(level=logging.INFO)
+            logger = logging.getLogger(__name__)
+            logger.warning("Using default configuration template. The parameter settings inside may not adapt to your current setup.")
+
     main(args.config_file)
