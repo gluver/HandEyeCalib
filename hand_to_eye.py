@@ -1,11 +1,3 @@
-# 文件说明：棋盘格手眼标定（眼在手外）
-
-'''
-在执行手眼标定时，需要将标定板固定在机械臂末端，并同时将相机固定在另一侧。
-接着控制机械臂末端位于不同的位置，记录下此时机械臂相对于基座的位姿，并使用相机拍摄标定板上的棋盘格图像。
-将图像放入./images文件夹中，并将位姿信息输入到chessboard_handeye_calibration.py文件的pose_vectors变量中。
-最后运行chessboard_handeye_calibration.py，即可得到相机相对于机械臂基座的位姿矩阵。
-'''
 
 import cv2
 import numpy as np
