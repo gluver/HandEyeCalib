@@ -191,9 +191,9 @@ def main(config_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hand-eye calibration using chessboard images.')
-    parser.add_argument('--config_file', type=str, default='config_template.yaml', help='Path to the YAML configuration file.')
+    parser.add_argument('--config_file', type=str, default='hand_to_eye_config_template.yaml', help='Path to the YAML configuration file.')
     args = parser.parse_args()
-    if args.config_file=='config_template.yaml':
+    if args.config_file=='hand_to_eye_config_template.yaml':
             logging.basicConfig(level=logging.INFO)
             logger = logging.getLogger(__name__)
             logger.warning("Using default configuration template. The parameter settings inside may not adapt to your current setup.")

@@ -13,7 +13,7 @@ def assess_image_quality(image):
 
 def main():
     parser = argparse.ArgumentParser(description='Process chessboard images and generate calibration input.')
-    parser.add_argument('--config-file', type=str, required=True,
+    parser.add_argument('--config-file',default='generate_calibrate_input_config.yaml', type=str,
                       help='Path to the configuration YAML file')
     
     args = parser.parse_args()
