@@ -1,5 +1,6 @@
 import os
 import shutil
+import argparse
 from datetime import datetime
 import cv2
 import numpy as np
@@ -9,63 +10,62 @@ def assess_image_quality(image):
     laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
     return laplacian_var
 
-# Source and destination directories
-src_dir = './result0225/DI0225'
-# Base directory for destination
-dst_base = './input_data'
+def main():
+    parser = argparse.ArgumentParser(description='Process chessboard images and generate calibration input.')
+    parser.add_argument('--src-dir', type=str, required=True,
+                      help='Source directory containing the images')
+    parser.add_argument('--pose-data', type=str, required=True,
+                      help='Path to the pose data CSV file')
+    parser.add_argument('--dst-base', type=str, default='./input_data',
+                      help='Base directory for output (default: ./input_data)')
+    parser.add_argument('--error-threshold', type=float, default=0.9,
+                      help='Maximum allowed reprojection error (default: 0.9)')
+    parser.add_argument('--chessboard-width', type=int, default=4,
+                      help='Number of inner corners along width (default: 4)')
+    parser.add_argument('--chessboard-height', type=int, default=3,
+                      help='Number of inner corners along height (default: 3)')
+    
+    args = parser.parse_args()
 
-pose_data_dir='./result0225/0225.csv'
-pose_data = np.loadtxt(pose_data_dir, delimiter=',')
-print("Pose data:")
-print(pose_data)
-chessboard_size = (4, 3)  # Adjust this based on your chessboard pattern
+    # Camera intrinsic parameters
+    camera_matrix = np.array([[1123.9, 0, 982.364],
+                            [0, 1123.4, 567.264],
+                            [0, 0, 1]], dtype=np.float32)
+    dist_coeffs = np.array([0.0769521, -0.105434, 0.0428337, 0, 0, 0, 6.25417e-05, 3.9459e-5], dtype=np.float32)
 
-# Camera intrinsic parameters (example values, replace with your actual parameters)
-camera_matrix = np.array([[1123.9, 0, 982.364],
-                          [0, 1123.4, 567.264],
-                          [0, 0, 1]], dtype=np.float32)
-dist_coeffs = np.array([0.0769521, -0.105434, 0.0428337, 0, 0, 0, 6.25417e-05, 3.9459e-5], dtype=np.float32)
+    # Create base directory if it doesn't exist
+    os.makedirs(args.dst_base, exist_ok=True)
+    human_friendly_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    dst_dir = os.path.join(args.dst_base, human_friendly_name)
 
+    # Create destination directory if it doesn't exist
+    os.makedirs(dst_dir, exist_ok=True)
 
-# Create base directory if it doesn't exist
-os.makedirs(dst_base, exist_ok=True)
-human_friendly_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-dst_dir = os.path.join(dst_base,human_friendly_name)
+    # Load pose data
+    pose_data = np.loadtxt(args.pose_data, delimiter=',')
+    print("Pose data loaded successfully")
 
-# Create destination directory if it doesn't exist
-os.makedirs(dst_dir, exist_ok=True)
+    # Get list of image files in the source directory
+    image_files = [f for f in os.listdir(args.src_dir) if f.endswith('.jpg')]
 
-# Get list of image files in the source directory
-image_files = [f for f in os.listdir(src_dir) if f.endswith('.jpg')]
+    # Sort image files based on timestamp in their names
+    image_files.sort(key=lambda x: datetime.strptime(x, 'frame%Y-%m-%d_%H-%M-%S.jpg'))
+    
+    print(f'Destination directory: {dst_dir}')
+    print(f'Source directory: {args.src_dir}')
 
-# Sort image files based on timestamp in their names
-image_files.sort(key=lambda x: datetime.strptime(x, 'frame%Y-%m-%d_%H-%M-%S.jpg'))
-# Log the destination directory name
-print(f'Destination directory: {dst_dir}')
-# Log the source directory name
-print(f'Source directory: {src_dir}')
-# Copy and rename images to the destination directory
-count_passed=0
-real_count=0
-filtered_pose_data=[]
-for i, filename in enumerate(image_files, start=0):
+    chessboard_size = (args.chessboard_width, args.chessboard_height)
+    count_passed = 0
+    filtered_pose_data = []
 
-    src_path = os.path.join(src_dir, filename)
-    dst_path = os.path.join(dst_dir, f'{count_passed}.jpg')
-    # Find chessboard corners
-    image = cv2.imread(src_path)
-    image = cv2.bitwise_not(image)
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    ret, corners = cv2.findChessboardCorners(gray_image, chessboard_size, None)
-    if ret:
-        # Draw and display the corners
-        cv2.drawChessboardCorners(image, chessboard_size, corners, ret)
-        cv2.imshow('Chessboard Corners', image)
-        cv2.waitKey(100)  # Display for 500 ms
-        cv2.destroyAllWindows()
+    for i, filename in enumerate(image_files, start=0):
+        src_path = os.path.join(args.src_dir, filename)
+        dst_path = os.path.join(dst_dir, f'{count_passed}.jpg')
 
-        objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
-        objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
+        image = cv2.imread(src_path)
+        image = cv2.bitwise_not(image)
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        ret, corners = cv2.findChessboardCorners(gray_image, chessboard_size, None)
 
         # Solve for the rotation and translation vectors
         _, rvecs, tvecs = cv2.solvePnP(objp, corners, camera_matrix, dist_coeffs)
