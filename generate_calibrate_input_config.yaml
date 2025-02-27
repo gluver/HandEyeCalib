@@ -1,0 +1,17 @@
+pose_file: 'DI0226/DI/6_data.csv' # Path to the pose file containing the pose data: x,y,z,rx,ry,rz
+src_dir: 'DI0226/DI' # Directory containing the images
+dst_base: './input_data'
+camera_params:
+  - 1123.9  # fx
+  - 1123.4  # fy
+  - 982.364 # cx
+  - 567.264 # cy
+  - 0.0769521  # k1
+  - -0.105434  # k2
+  - 6.25417e-05  # p1
+  - 3.9459e-5  # p2
+  - 0.0428337  # k3
+square_size: 100  # Size of a square in the chessboard pattern
+pattern_size: [7, 5]  # Size of the chessboard pattern as columns,rows
+corner_color: 'black'  # Corner color, 'black' or 'white'
+error_threshold: 0.9

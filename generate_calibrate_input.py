@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime
 import cv2
 import numpy as np
+import yaml
 
 def assess_image_quality(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -12,61 +13,63 @@ def assess_image_quality(image):
 
 def main():
     parser = argparse.ArgumentParser(description='Process chessboard images and generate calibration input.')
-    parser.add_argument('--src-dir', type=str, required=True,
-                      help='Source directory containing the images')
-    parser.add_argument('--pose-data', type=str, required=True,
-                      help='Path to the pose data CSV file')
-    parser.add_argument('--dst-base', type=str, default='./input_data',
-                      help='Base directory for output (default: ./input_data)')
-    parser.add_argument('--error-threshold', type=float, default=0.9,
-                      help='Maximum allowed reprojection error (default: 0.9)')
-    parser.add_argument('--chessboard-width', type=int, default=4,
-                      help='Number of inner corners along width (default: 4)')
-    parser.add_argument('--chessboard-height', type=int, default=3,
-                      help='Number of inner corners along height (default: 3)')
+    parser.add_argument('--config-file', type=str, required=True,
+                      help='Path to the configuration YAML file')
     
     args = parser.parse_args()
 
+    # Load configuration
+    with open(args.config_file, 'r') as file:
+        config = yaml.safe_load(file)
+
     # Camera intrinsic parameters
-    camera_matrix = np.array([[1123.9, 0, 982.364],
-                            [0, 1123.4, 567.264],
+    camera_params = config['camera_params']
+    fx, fy, cx, cy, k1, k2, p1, p2, k3 = camera_params
+    camera_matrix = np.array([[fx, 0, cx],
+                            [0, fy, cy],
                             [0, 0, 1]], dtype=np.float32)
-    dist_coeffs = np.array([0.0769521, -0.105434, 0.0428337, 0, 0, 0, 6.25417e-05, 3.9459e-5], dtype=np.float32)
+    dist_coeffs = np.array([k1, k2, p1, p2, k3], dtype=np.float32)
 
     # Create base directory if it doesn't exist
-    os.makedirs(args.dst_base, exist_ok=True)
+    os.makedirs(config['dst_base'], exist_ok=True)
     human_friendly_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    dst_dir = os.path.join(args.dst_base, human_friendly_name)
+    dst_dir = os.path.join(config['dst_base'], human_friendly_name)
 
     # Create destination directory if it doesn't exist
     os.makedirs(dst_dir, exist_ok=True)
 
     # Load pose data
-    pose_data = np.loadtxt(args.pose_data, delimiter=',')
+    pose_data = np.loadtxt(config['pose_file'], delimiter=',')
     print("Pose data loaded successfully")
 
     # Get list of image files in the source directory
-    image_files = [f for f in os.listdir(args.src_dir) if f.endswith('.jpg')]
+    image_files = [f for f in os.listdir(config['src_dir']) if f.endswith('.jpg')]
 
     # Sort image files based on timestamp in their names
     image_files.sort(key=lambda x: datetime.strptime(x, 'frame%Y-%m-%d_%H-%M-%S.jpg'))
     
     print(f'Destination directory: {dst_dir}')
-    print(f'Source directory: {args.src_dir}')
+    print(f"Source directory: {config['src_dir']}")
 
-    chessboard_size = (args.chessboard_width, args.chessboard_height)
+    chessboard_pattern_size = config["pattern_size"]
     count_passed = 0
     filtered_pose_data = []
 
+    # Define the objp variable
+    objp = np.zeros((config['pattern_size'][0] * config['pattern_size'][1], 3), np.float32)
+    objp[:, :2] = np.mgrid[0:config['pattern_size'][0], 0:config['pattern_size'][1]].T.reshape(-1, 2)
+
     for i, filename in enumerate(image_files, start=0):
-        src_path = os.path.join(args.src_dir, filename)
+        src_path = os.path.join(config['src_dir'], filename)
         dst_path = os.path.join(dst_dir, f'{count_passed}.jpg')
 
         image = cv2.imread(src_path)
         image = cv2.bitwise_not(image)
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        ret, corners = cv2.findChessboardCorners(gray_image, chessboard_size, None)
-
+        ret, corners = cv2.findChessboardCorners(gray_image, chessboard_pattern_size, None)
+        if not ret:
+            print(f"Chessboard not found in {filename}")
+            continue
         # Solve for the rotation and translation vectors
         _, rvecs, tvecs = cv2.solvePnP(objp, corners, camera_matrix, dist_coeffs)
 
@@ -77,30 +80,20 @@ def main():
         error = cv2.norm(corners, img_points, cv2.NORM_L2) / len(img_points)
 
         print(f'Reprojection error for {filename}: {error}')
-        # if error < 0.3:
-        #     # Copy the image to the output directory
-        #     if count_passed in [3,4,5,6,15,16]:
-        #         dst_path = os.path.join(dst_dir, f'{real_count}.jpg')
-        #         shutil.copy(src_path, dst_path)
-        #         filtered_pose_data.append(pose_data[i])
-        #         print(f'Appended pose data for {filename}: {pose_data[i]}')
-        #         quality_score = assess_image_quality(image)
-        #         print(f'Renamed {filename} to {real_count}.jpg with quality score: {quality_score}')
-        #         real_count+=1
-        #     count_passed+=1
-        if error < 0.9:
+        if error < config['error_threshold']:
             # Copy the image to the output directory
             shutil.copy(src_path, dst_path)
             filtered_pose_data.append(pose_data[i])
             print(f'Appended pose data for {filename}: {pose_data[i]}')
             quality_score = assess_image_quality(image)
             print(f'Renamed {filename} to {count_passed}.jpg with quality score: {quality_score}')
-            count_passed+=1
+            count_passed += 1
 
+    # Write the filtered pose data to a CSV file
+    filtered_pose_data = np.array(filtered_pose_data)
+    pose_output_path = os.path.join(dst_dir, f'filtered_pose_data_{human_friendly_name}.csv')
+    np.savetxt(pose_output_path, filtered_pose_data, delimiter=',', fmt='%.6f')
+    print(f'Filtered pose data saved to {pose_output_path}')
 
-# Write the filtered pose data to a CSV file
-filtered_pose_data = np.array(filtered_pose_data)
-pose_output_path = os.path.join(dst_base, f'filtered_pose_data_{human_friendly_name}.csv')
-np.savetxt(pose_output_path, filtered_pose_data, delimiter=',', fmt='%.6f')
-print(f'Filtered pose data saved to {pose_output_path}')
-   
+if __name__ == "__main__":
+    main()
