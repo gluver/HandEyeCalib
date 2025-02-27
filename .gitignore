@@ -10,3 +10,4 @@ input_data/*
 opencv-4.11.0/
 *.zip
 *.rar
+__pycache__/
