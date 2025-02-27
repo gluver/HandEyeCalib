@@ -10,7 +10,11 @@ pip install -r requirements.txt
 
 ### 准备数据
 
-拍摄棋盘的照片和记录相应的多样化机器人末端姿态（尽可能6个维度都发生变化），文件结构如下（确保您的图像时间戳格式与`datetime.now().strftime('%Y-%m-%d_%H-%M-%S')`匹配）：
+**Instructions:**
+- 1.拍摄棋盘的照片和记录相应的机器人末端姿态
+- 2.确保机器人末端姿态包括所有六个维度（6D）的变化。
+- 3.使用以下文件结构组织捕获的图像和机器人姿态。
+- 4.确保图像的时间戳格式与`datetime.now().strftime('%Y-%m-%d_%H-%M-%S')`匹配：
 
 ```shell
 DI0226/DI
@@ -32,7 +36,7 @@ DI0226/DI
 └── frame2025-02-25_10-35-03.jpg
 ```
 
-生成手眼校准的输入文件：
+生成手眼标定的输入文件：
 
 ```shell
 cp generate_calibrate_input_config_template.yaml generate_calibrate_input_config.yaml
@@ -87,7 +91,7 @@ usage: generate_calibrate_input.py [-h] [--config-file CONFIG_FILE]
 cp hand_to_eye_config_template.yaml hand_to_eye_config.yaml
 ```
 
-根据您的设置更改手眼校准配置部分：
+根据您的设置更改手眼标定配置部分：
 
 ```yaml
 pose_file: 'input_data/filtered_pose_data_2025-02-26_14-26-39.csv'
@@ -108,7 +112,7 @@ corner_color: 'black'  # 角点颜色，'black'或'white'
 result_file: 'result_matrix.txt' 
 ```
 
-运行校准脚本：
+运行标定脚本：
 
 ```shell
 python hand_to_eye.py --config-file hand_to_eye_config.yaml
@@ -119,7 +123,7 @@ python hand_to_eye.py --config-file hand_to_eye_config.yaml
 ```shell
 usage: hand_to_eye.py [-h] [--config_file CONFIG_FILE]
 
-使用棋盘图像进行手眼校准。
+使用棋盘图像进行手眼标定。
 
 选项:
   -h, --help            显示此帮助消息并退出
@@ -164,3 +168,6 @@ Usage:
                         包含点的PLY文件的路径。
   --matrix_file MATRIX_FILE
                         包含cam2base矩阵的文件路径。
+
+```
+使用点云可视化软件选取兴趣点，将机器人移动到对应位置进行验证
