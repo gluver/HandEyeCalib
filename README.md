@@ -36,7 +36,7 @@ DI0226/DI
 └── frame2025-02-25_10-35-03.jpg
 ```
 
-Generate the input file for hand to eye calibration:
+#### Generate the input file for hand to eye calibration:
 
 ```shell
 cp generate_calibrate_input_config_template.yaml generate_calibrate_input_config.yaml

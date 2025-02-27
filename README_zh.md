@@ -36,7 +36,7 @@ DI0226/DI
 └── frame2025-02-25_10-35-03.jpg
 ```
 
-生成手眼标定的输入文件：
+#### 生成手眼标定的输入文件：
 
 ```shell
 cp generate_calibrate_input_config_template.yaml generate_calibrate_input_config.yaml
