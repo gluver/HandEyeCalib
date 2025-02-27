@@ -101,7 +101,8 @@ pattern_size = (4, 3)   # 在这个例子中，假设标定板有9个内角点�
 camera_matrix = np.array([[1123.9, 0, 982.364],
                           [0, 1123.4, 567.264],
                           [0, 0, 1]], dtype=np.float32)
-dist_coeffs = np.array([0.0769521, -0.105434, 0,0], dtype=np.float32)
+#k1 k2 p1 p2 k3
+dist_coeffs = np.array([0.0769521, -0.105434, 6.25417e-05, 3.9459e-5,0.0428337], dtype=np.float32)
 
 # camera_matrix = np.array([[1123.9, 0, 982.364],
 #                           [0, 1123.4, 567.264],
@@ -191,7 +192,7 @@ T_camera2base[:3, :3] = R_camera2base
 T_camera2base[:3, 3] = t_camera2base.reshape(3)
  
 # 输出相机相对于机械臂基座的旋转矩阵和平移向量
-print("Camera to base rotation matrix:")
+print("Camera to base / base to camera rotation matrix:")
 print(R_camera2base)
 print("Camera to base translation vector:") 
 print(t_camera2base)

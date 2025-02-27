@@ -3,3 +3,4 @@ numpy
 transforms3d
 pandas
 openpyxl
+open3d
