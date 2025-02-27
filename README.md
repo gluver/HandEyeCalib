@@ -10,7 +10,11 @@ pip install -r requirements.txt
 
 ### Prepare the Data
 
-Take photos of the chessboard and corresponding diverse robot end pose (with changes in all 6D dimensions) with the following file structure (make sure your image timestamp format matches `datetime.now().strftime('%Y-%m-%d_%H-%M-%S')`):
+ **Instructions:**
+ - 1.Capture images of the chessboard along with the corresponding diverse robot end poses.
+ - 2.Ensure that the robot end poses include variations in all six dimensions (6D).
+ - 3.Organize the captured images and robot poses using the following file structure.
+ - 4.Make sure the timestamp format of your images matches the format produced by `datetime.now().strftime('%Y-%m-%d_%H-%M-%S')`:
 
 ```shell
 DI0226/DI
