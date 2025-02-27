@@ -2,6 +2,8 @@ import numpy as np
 import unittest
 import subprocess
 
+np.set_printoptions(suppress=True) 
+
 def load_ground_truth():
     return np.array([
         [0.99147172, -0.12675601, -0.0302779, 1919.75642688],
@@ -36,7 +38,7 @@ def matrix_percentage_difference(matrix1, matrix2):
   
 class TestCalibration(unittest.TestCase):
     def test_hand_to_eye(self):
-        result = subprocess.run(['python3', 'hand_to_eye.py', '--config', 'config_template.yaml'], capture_output=True, text=True)
+        result = subprocess.run(['python3', 'hand_to_eye.py', '--config', 'hand_to_eye_config_template.yaml'], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, msg=f"Script failed with output: {result.stdout}\n{result.stderr}")
 
         # Assuming the script outputs the result matrix in a file or stdout

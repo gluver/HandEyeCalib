@@ -88,8 +88,8 @@ def main(config_file):
 
     # 输入位姿数据
     pose_vectors = np.loadtxt(config['pose_file'], delimiter=',')
-    logger.info("Loaded pose vectors from CSV:")
-    logger.info(pose_vectors)
+    logger.info(f"Loaded pose vectors from CSV:{config['pose_file']}")
+    # logger.info(pose_vectors)
 
     # 导入相机内参和畸变参数
     camera_params = config['camera_params']
@@ -118,7 +118,7 @@ def main(config_file):
     for i in range(50):
         image = os.path.join(config['image_folder'], f'{i}.jpg')
         if i == 0:
-            logger.info(os.path.basename(image))
+            logger.info(f"Using input image from {config['image_folder']}")
         if not os.path.exists(image):
             continue
         img = cv2.imread(image)   # 读取图像
@@ -138,7 +138,7 @@ def main(config_file):
             # 绘制并显示角点
             cv2.drawChessboardCorners(img, pattern_size, corners, ret)
             cv2.imshow('img', img)
-            cv2.waitKey(500)
+            cv2.waitKey(100)
 
     cv2.destroyAllWindows()
 
@@ -173,7 +173,7 @@ def main(config_file):
     T_camera2base[:3, 3] = t_camera2base.reshape(3)
 
     # 输出相机相对于机械臂基座的旋转矩阵和平移向量
-    logger.info("Camera to base / base to camera rotation matrix:")
+    logger.info("Camera to base rotation matrix:")
     logger.info(R_camera2base)
     logger.info("Camera to base translation vector:") 
     logger.info(t_camera2base)
@@ -196,6 +196,6 @@ if __name__ == "__main__":
     if args.config_file=='hand_to_eye_config_template.yaml':
             logging.basicConfig(level=logging.INFO)
             logger = logging.getLogger(__name__)
-            logger.warning("Using default configuration template. The parameter settings inside may not adapt to your current setup.")
+            logger.warning("\033[91mUsing default configuration template. The parameter settings inside may not adapt to your current setup.\033[0m")
 
     main(args.config_file)
