@@ -3,7 +3,9 @@ result0225/
 build/
 DI/
 DI0226/
-input_data
+input_data/*
+!input_data/filtered_pose_data_2025-02-26_15-25-11.csv
+!input_data/2025-02-26_15-25-11/
 opencv-4.11.0/
 *.zip
 *.rar
