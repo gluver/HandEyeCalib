@@ -171,4 +171,3 @@ options:
 ```
 Pick the point of interest and get coordinate under the robot frame ,move your robot tool to the place to check                            
 ![alt text](docs/img/8eaa371139564044ac4e082bcd9d2468.jpg)
-![alt text](docs/img/8eaa371139564044ac4e082bcd9d2468.jpg)

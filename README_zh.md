@@ -172,4 +172,3 @@ Usage:
 ```
 使用点云可视化软件选取兴趣点，将机器人移动到对应位置进行验证
 ![alt text](docs/img/8eaa371139564044ac4e082bcd9d2468.jpg)
-![alt text](docs/img/8eaa371139564044ac4e082bcd9d2468.jpg)
