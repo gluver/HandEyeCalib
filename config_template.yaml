@@ -1,5 +1,5 @@
-pose_file: 'input_data/filtered_pose_data_2025-02-26_15-25-11.csv'
-image_folder: 'input_data/2025-02-26_15-25-11'
+pose_file: 'input_data/filtered_pose_data_2025-02-26_14-26-39.csv'
+image_folder: 'input_data/2025-02-26_14-26-39'
 camera_params:
   - 1123.9  # fx
   - 1123.4  # fy
@@ -13,3 +13,4 @@ camera_params:
 square_size: 100  # Size of a square in the chessboard pattern
 pattern_size: [7, 5]  # Size of the chessboard pattern as columns,rows
 corner_color: 'black'  # Corner color, 'black' or 'white'
+result_file: 'result_matrix.txt'

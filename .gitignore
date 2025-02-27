@@ -6,6 +6,8 @@ DI0226/
 input_data/*
 !input_data/filtered_pose_data_2025-02-26_15-25-11.csv
 !input_data/2025-02-26_15-25-11/
+!input_data/filtered_pose_data_2025-02-26_14-26-39.csv
+!input_data/2025-02-26_14-26-39/
 opencv-4.11.0/
 *.zip
 *.rar

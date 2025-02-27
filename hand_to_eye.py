@@ -182,6 +182,12 @@ def main(config_file):
     logger.info("Camera to base pose matrix:")
     np.set_printoptions(suppress=True)  # suppress参数用于禁用科学计数法
     logger.info(T_camera2base)
+    # 将位姿矩阵写入文件
+    result_file = config.get('result_file', 'result_matrix.txt')
+    with open(result_file, 'w') as f:
+        for line in T_camera2base:
+            np.savetxt(f, line[np.newaxis], fmt='%.6f')
+    logger.info(f"Camera to base pose matrix saved to {result_file}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hand-eye calibration using chessboard images.')
