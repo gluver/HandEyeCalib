@@ -1,0 +1,14 @@
+pose_file: '/home/credog/Documents/HandEyeCalibCpp/input_data/filtered_pose_data_2025-02-26_15-25-11.csv'
+image_folder: '/home/credog/Documents/HandEyeCalibCpp/input_data/2025-02-26_15-25-11'
+camera_params:
+  - 1123.9  # fx
+  - 1123.4  # fy
+  - 982.364 # cx
+  - 567.264 # cy
+  - 0.0769521  # k1
+  - -0.105434  # k2
+  - 6.25417e-05  # p1
+  - 3.9459e-5  # p2
+  - 0.0428337  # k3
+square_size: 50  # Size of a square in the chessboard pattern
+pattern_size: [4, 3]  # Size of the chessboard pattern as columns,rows

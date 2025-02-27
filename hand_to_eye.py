@@ -14,6 +14,7 @@ import glob
 import re
 import os
 import argparse
+import yaml
 
 def pose_vectors_to_base2end_transforms(pose_vectors):
     # 提取旋转矩阵和平移向量
@@ -72,22 +73,31 @@ def euler_to_rotation_matrix(rx, ry, rz, unit='deg'):
 
     return rotation_matrix
 
-def main(pose_file, image_folder):
+def load_config(config_file):
+    with open(config_file, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
+def main(config_file):
+    config = load_config(config_file)
+
     # 输入位姿数据
-    pose_vectors = np.loadtxt(pose_file, delimiter=',')
+    pose_vectors = np.loadtxt(config['pose_file'], delimiter=',')
     print("Loaded pose vectors from CSV:")
     print(pose_vectors)
 
-    # 定义棋盘格参数
-    square_size = 50  # 假设格子的边长为30mm
-    pattern_size = (4, 3)   # 在这个例子中，假设标定板有9个内角点和6个内角点
-
     # 导入相机内参和畸变参数
-    camera_matrix = np.array([[1123.9, 0, 982.364],
-                              [0, 1123.4, 567.264],
+    camera_params = config['camera_params']
+    fx, fy, cx, cy, k1, k2, p1, p2, k3 = camera_params
+    camera_matrix = np.array([[fx, 0, cx],
+                              [0, fy, cy],
                               [0, 0, 1]], dtype=np.float32)
-    dist_coeffs = np.array([0.0769521, -0.105434, 6.25417e-05, 3.9459e-5,0.0428337], dtype=np.float32)
+    dist_coeffs = np.array([k1, k2, p1, p2, k3], dtype=np.float32)
     K = camera_matrix
+
+    # 棋盘格参数
+    square_size = config['square_size']
+    pattern_size = tuple(config['pattern_size'])
 
     # 准备位姿数据
     obj_points = []  # 用于保存世界坐标系中的三维点
@@ -100,7 +110,7 @@ def main(pose_file, image_folder):
     # 迭代处理图像
     det_success_num = 0  # 用于保存检测成功的图像数量
     for i in range(50):
-        image = os.path.join(image_folder, f'{i}.jpg')
+        image = os.path.join(config['image_folder'], f'{i}.jpg')
         if i == 0:
             print(image)
         if not os.path.exists(image):
@@ -168,7 +178,6 @@ def main(pose_file, image_folder):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Hand-eye calibration using chessboard images.')
-    parser.add_argument('pose_file', type=str, help='Path to the CSV file containing pose vectors.')
-    parser.add_argument('image_folder', type=str, help='Path to the folder containing chessboard images.')
+    parser.add_argument('config_file', type=str, help='Path to the YAML configuration file.')
     args = parser.parse_args()
-    main(args.pose_file, args.image_folder)
+    main(args.config_file)
