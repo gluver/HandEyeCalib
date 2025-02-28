@@ -59,7 +59,7 @@ camera_params:
   - 3.9459e-5  # p2
   - 0.0428337  # k3
 square_size: 100  # 棋盘格的大小
-pattern_size: [7, 5]  # 棋盘格的列数和行数
+pattern_size: [7, 5]  # 棋盘格内角点特征的列数和行数
 corner_color: 'black'  # 角点颜色，'black'或'white'
 error_threshold: 0.9
 ```
