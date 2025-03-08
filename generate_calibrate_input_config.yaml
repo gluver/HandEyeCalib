@@ -1,0 +1,19 @@
+pose_file: '/home/credog/Documents/scara_handeye_calibration/rgbdata/pose.csv' # Path to the pose file containing the pose data: x,y,z,rx,ry,rz
+src_dir: '/home/credog/Documents/scara_handeye_calibration/rgbdata' # Directory containing the images
+dst_base: './input_data'
+camera_params:
+  - 909.10498046875  # fx
+  - 908.8701171875  # fy
+  - 645.127075195312  # cx
+  - 357.441741943359  # cy
+  - 0  # k1
+  - 0  # k2
+  - 0  # p1
+  - 0  # p2
+  - 0  # k3
+square_size: 20  # Size of a square in the chessboard pattern
+pattern_size: [5, 8]  # Size of the chessboard pattern as columns,rows
+corner_color: 'white'  # Corner color, 'black' or 'white'
+error_threshold: 0.9
+sort_by_timestamp: False
+save_base2gripper_4dof: True
